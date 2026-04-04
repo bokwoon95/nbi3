@@ -1,0 +1,185 @@
+{{ block "preamble" $ }}
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ block "title" $ }}Notebrew{{ end }}</title>
+{{ if $.ContextData.DevMode }}
+<link rel="stylesheet" href="/cms/static/notebrew.min.css">
+<script type="module" src="/cms/static/notebrew.min.js"></script>
+{{ else }}
+<style>{{ $.ContextData.NotebrewCSS }}</style>
+<script type="module">{{ $.ContextData.NotebrewJS }}</script>
+{{ end }}
+{{ end }}
+
+{{ block "sidebar" $ }}
+<aside class="sidebar" data-side="left" aria-hidden="false">
+  <nav aria-label="Sidebar navigation">
+    <header>
+      <div class="flex items-center">
+        <a href="/cms/login/" class="btn-ghost justify-start grow">
+          {{ template "icon-tabler-user" }}
+          {{ if $.ContextData.Username }}{{ $.ContextData.Username }}{{ else }}<em>default user</em>{{ end }}
+        </a>
+        <button type="button" class="btn-icon-ghost" data-click-event="basecoat:sidebar" title="Hide sidebar">{{ template "tabler-x" }}</button>
+      </div>
+    </header>
+    <section class="scrollbar">
+      <details role="group" aria-labelledby="notes" open>
+        <summary><h3 id="notes">Notes</h3></summary>
+        <ul>
+          <li><a href="/cms/notes/">{{ template "tabler-notebook" }}Notes</a></li>
+          <li><a href="/cms/notes/foo/" title="this goes to foo">{{ template "icon-tabler-file-text" }}foo</a></li>
+          <li><a href="/cms/notes/bar/" title="this goes to bar">{{ template "icon-tabler-folder-open" }}bar</a></li>
+          <li><a href="/cms/notes/baz/" title="this goes to baz">{{ template "icon-tabler-file" }}baz</a></li>
+        </ul>
+      </details>
+      <details role="group" aria-labelledby="photos" open>
+        <summary><h3 id="photos">Photos</h3></summary>
+        <ul>
+          <li><a href="/cms/photos/">{{ template "icon-tabler-library-photo" }}Photos</a></li>
+          <li><a href="/cms/photos/foo/">{{ template "icon-tabler-photo" }}foo</a></li>
+          <li><a href="/cms/photos/bar/">{{ template "icon-tabler-folder-open" }}bar</a></li>
+          <li><a href="/cms/photos/baz/">{{ template "icon-tabler-file" }}baz</a></li>
+        </ul>
+      </details>
+      <details role="group" aria-labelledby="blogs" open>
+        <summary><h3 id="blogs">Blogs</h3></summary>
+        <ul>
+          <li>
+            <details open>
+              <summary>bokwoon.com</summary>
+              <ul>
+                <li><a href="/cms/blogs/bokwoon.com/">Blog</a></li>
+                <li><a href="/cms/blogs/bokwoon.com/">Pages</a></li>
+                <li><a href="/cms/blogs/bokwoon.com/">Posts</a></li>
+              </ul>
+            </details>
+          </li>
+          <li>
+            <details open>
+              <summary>@bokwoon</summary>
+              <ul>
+                <li><a href="/cms/blogs/bokwoon/">Blog</a></li>
+                <li><a href="/cms/blogs/bokwoon/">Pages</a></li>
+                <li><a href="/cms/blogs/bokwoon/">Posts</a></li>
+              </ul>
+            </details>
+          </li>
+          <li>
+            <details open>
+              <summary>@bokwoon</summary>
+              <ul>
+                <li><a href="/cms/blogs/bokwoon/">Blog</a></li>
+                <li><a href="/cms/blogs/bokwoon/">Pages</a></li>
+                <li><a href="/cms/blogs/bokwoon/">Posts</a></li>
+              </ul>
+            </details>
+          </li>
+          <li>
+            <details open>
+              <summary>@bokwoon</summary>
+              <ul>
+                <li><a href="/cms/blogs/bokwoon/">Blog</a></li>
+                <li><a href="/cms/blogs/bokwoon/">Pages</a></li>
+                <li><a href="/cms/blogs/bokwoon/">Posts</a></li>
+              </ul>
+            </details>
+          </li>
+          <li>
+            <details open>
+              <summary>@bokwoon</summary>
+              <ul>
+                <li><a href="/cms/blogs/bokwoon/">Blog</a></li>
+                <li><a href="/cms/blogs/bokwoon/">Pages</a></li>
+                <li><a href="/cms/blogs/bokwoon/">Posts</a></li>
+              </ul>
+            </details>
+          </li>
+          <li>
+            <details open>
+              <summary>@bokwoon</summary>
+              <ul>
+                <li><a href="/cms/blogs/bokwoon/">Blog</a></li>
+                <li><a href="/cms/blogs/bokwoon/">Pages</a></li>
+                <li><a href="/cms/blogs/bokwoon/">Posts</a></li>
+              </ul>
+            </details>
+          </li>
+        </ul>
+      </details>
+      <div class="flex p-2 items-center">
+        <img class="size-8 shrink-0 object-cover rounded-full" alt="@hunvreus" src="/cms/static/Azul.jpg">
+        <div class="grow">
+          <div>
+            username
+          </div>
+          <div class="text-sm text-muted-foreground">email</div>
+        </div>
+        <div class="dropdown-menu">
+          <button type="button" aria-haspopup="menu" aria-expanded="false" class="btn-outline" data-keep-mobile-sidebar-open>{{ template "tabler-settings" }}</button>
+          <div data-popover aria-hidden="true" class="min-w-56">
+            <div role="menu" aria-labelledby="demo-dropdown-menu-trigger">
+              <div role="group" aria-labelledby="account-options">
+                <div role="heading">My Account</div>
+                <div role="menuitem">
+                  Profile
+                  <span class="text-muted-foreground ml-auto text-xs tracking-widest">⇧⌘P</span>
+                </div>
+                <div role="menuitem">
+                  Billing
+                  <span class="text-muted-foreground ml-auto text-xs tracking-widest">⌘B</span>
+                </div>
+                <div role="menuitem">
+                  Settings
+                  <span class="text-muted-foreground ml-auto text-xs tracking-widest">⌘S</span>
+                </div>
+                <div role="menuitem">
+                  Keyboard shortcuts
+                  <span class="text-muted-foreground ml-auto text-xs tracking-widest">⌘K</span>
+                </div>
+              </div>
+              <hr role="separator" />
+              <div role="menuitem">GitHub</div>
+              <div role="menuitem">Support</div>
+              <div role="menuitem" aria-disabled="true">API</div>
+              <hr role="separator" />
+              <div role="menuitem">
+                Logout
+                <span class="text-muted-foreground ml-auto text-xs tracking-widest">⇧⌘P</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div>2.1 GB / 6.0 GB</div>
+        <div class="bg-primary/20 relative h-2 w-full overflow-hidden rounded-full">
+          <div id="demo-progress" class="bg-primary h-full w-full flex-1 transition-all" style="width: 35%"></div>
+        </div>
+      </div>
+    </section>
+    <footer>
+    </footer>
+  </nav>
+</aside>
+{{ end }}
+
+<main>
+  <nav class="sticky top-0 inset-x-0 isolate z-10 border-b bg-turq-dark hidden sm:flex items-center">
+    {{ block "topbar" $ }}
+    <button class="btn-icon-ghost size-11 mx-2 lg:my-1" data-click-event="basecoat:sidebar" title="Toggle sidebar">{{ template "icon-tabler-layout-sidebar" }}</button>
+    {{ end }}
+  </nav>
+  <div class="mx-auto w-full max-w-7xl">
+    {{ block "content" $ }}
+    <h1>Content</h1>
+    {{ end }}
+  </div>
+  <div class="h-12"></div>
+  <nav class="fixed bottom-0 border-t bg-turq-dark text-white flex justify-between sm:hidden items-center w-full">
+    {{ block "bottombar" $ }}
+    <button class="btn-icon-ghost size-11 mx-2 lg:my-1" data-click-event="basecoat:sidebar" title="Toggle sidebar">{{ template "icon-tabler-layout-sidebar" }}</button>
+    {{ end }}
+  </nav>
+</main>
