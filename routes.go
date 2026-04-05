@@ -87,123 +87,120 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		nbrew.BadRequest(w, r, contextData, err)
 		return
 	}
-	if urlPath, found := strings.CutPrefix(urlPath, "/cms/"); found {
-		var sessionToken string
-		header := r.Header.Get("Authorization")
-		if header != "" {
-			sessionToken = strings.TrimPrefix(header, "Bearer ")
-		} else {
-			cookie, _ := r.Cookie("session")
-			if cookie != nil {
-				sessionToken = cookie.Value
-			}
-		}
-		var user User
-		if sessionToken != "" {
-			sessionTokenBytes, err := hex.DecodeString(fmt.Sprintf("%048s", sessionToken))
-			if err == nil && len(sessionTokenBytes) == 24 {
-				var sessionTokenHash [8 + blake2b.Size256]byte
-				checksum := blake2b.Sum256(sessionTokenBytes[8:])
-				copy(sessionTokenHash[:8], sessionTokenBytes[:8])
-				copy(sessionTokenHash[8:], checksum[:])
-				user, err = sq.FetchOne(r.Context(), nbrew.DB, sq.Query{
-					Dialect: nbrew.Dialect,
-					Format: "SELECT {*}" +
-						" FROM session" +
-						" JOIN users ON users.user_id = session.user_id" +
-						" WHERE session.session_token_hash = {sessionTokenHash}",
-					Values: []any{
-						sq.BytesParam("sessionTokenHash", sessionTokenHash[:]),
-					},
-				}, func(row *sq.Row) User {
-					user := User{
-						UserID:                row.UUID("users.user_id"),
-						Username:              row.String("users.username"),
-						Email:                 row.String("users.email"),
-						TimezoneOffsetSeconds: row.Int("users.timezone_offset_seconds"),
-						DisableReason:         row.String("users.disable_reason"),
-						SiteLimit:             row.Int64("coalesce(users.site_limit, -1)"),
-						StorageLimit:          row.Int64("coalesce(users.storage_limit, -1)"),
-					}
-					b := row.Bytes(nil, "users.user_flags")
-					if len(b) > 0 {
-						err := json.Unmarshal(b, &user.UserFlags)
-						if err != nil {
-							panic(stacktrace.New(err))
-						}
-					}
-					return user
-				})
-				if err != nil {
-					if !errors.Is(err, sql.ErrNoRows) {
-						contextData.Logger.Error(err.Error())
-						nbrew.InternalServerError(w, r, contextData, err)
-						return
-					}
-				}
-				contextData.UserID = user.UserID
-				contextData.Username = user.Username
-				contextData.DisableReason = user.DisableReason
-				contextData.UserFlags = user.UserFlags
-			}
-		}
-		pathHead, pathTail, _ := strings.Cut(strings.Trim(urlPath, "/"), "/")
-		contextData.PathTail = pathTail
-		switch pathHead {
-		case "static":
-			if pathTail == "" {
-				nbrew.NotFound(w, r, contextData)
-				return
-			}
-			http.ServeFileFS(w, r, runtimeFS, urlPath)
-			return
-		case "login":
-			// nbrew.login(w, r, contextData)
-			return
-		case "logout":
-			if pathTail != "" {
-				nbrew.NotFound(w, r, contextData)
-				return
-			}
-			// nbrew.logout(w, r, contextData) // TODO
-			return
-		case "resetpassword":
-			if pathTail != "" {
-				nbrew.NotFound(w, r, contextData)
-				return
-			}
-			// nbrew.resetpassword(w, r, contextData) // TODO
-			return
-		case "invite":
-			if pathTail != "" {
-				nbrew.NotFound(w, r, contextData)
-				return
-			}
-			// nbrew.invite(w, r, contextData) // TODO
-			return
-		}
-		if contextData.UserID.IsZero() {
-			nbrew.NotAuthenticated(w, r, contextData)
-			return
-		}
-		switch pathHead {
-		case "":
-			http.Redirect(w, r, "/cms/notes/", http.StatusFound)
-			return
-		case "notes":
-			// nbrew.notes(w, r, contextData)
-			return
-		case "photos":
-			// nbrew.photos(w, r, contextData) // TODO
-			nbrew.NotFound(w, r, contextData)
-			return
-		case "blogs":
-			nbrew.NotFound(w, r, contextData)
-			return
-		default:
-			nbrew.NotFound(w, r, contextData)
-			return
+	var sessionToken string
+	header := r.Header.Get("Authorization")
+	if header != "" {
+		sessionToken = strings.TrimPrefix(header, "Bearer ")
+	} else {
+		cookie, _ := r.Cookie("session")
+		if cookie != nil {
+			sessionToken = cookie.Value
 		}
 	}
-	nbrew.NotFound(w, r, contextData)
+	var user User
+	if sessionToken != "" {
+		sessionTokenBytes, err := hex.DecodeString(fmt.Sprintf("%048s", sessionToken))
+		if err == nil && len(sessionTokenBytes) == 24 {
+			var sessionTokenHash [8 + blake2b.Size256]byte
+			checksum := blake2b.Sum256(sessionTokenBytes[8:])
+			copy(sessionTokenHash[:8], sessionTokenBytes[:8])
+			copy(sessionTokenHash[8:], checksum[:])
+			user, err = sq.FetchOne(r.Context(), nbrew.DB, sq.Query{
+				Dialect: nbrew.Dialect,
+				Format: "SELECT {*}" +
+					" FROM session" +
+					" JOIN users ON users.user_id = session.user_id" +
+					" WHERE session.session_token_hash = {sessionTokenHash}",
+				Values: []any{
+					sq.BytesParam("sessionTokenHash", sessionTokenHash[:]),
+				},
+			}, func(row *sq.Row) User {
+				user := User{
+					UserID:                row.UUID("users.user_id"),
+					Username:              row.String("users.username"),
+					Email:                 row.String("users.email"),
+					TimezoneOffsetSeconds: row.Int("users.timezone_offset_seconds"),
+					DisableReason:         row.String("users.disable_reason"),
+					SiteLimit:             row.Int64("coalesce(users.site_limit, -1)"),
+					StorageLimit:          row.Int64("coalesce(users.storage_limit, -1)"),
+				}
+				b := row.Bytes(nil, "users.user_flags")
+				if len(b) > 0 {
+					err := json.Unmarshal(b, &user.UserFlags)
+					if err != nil {
+						panic(stacktrace.New(err))
+					}
+				}
+				return user
+			})
+			if err != nil {
+				if !errors.Is(err, sql.ErrNoRows) {
+					contextData.Logger.Error(err.Error())
+					nbrew.InternalServerError(w, r, contextData, err)
+					return
+				}
+			}
+			contextData.UserID = user.UserID
+			contextData.Username = user.Username
+			contextData.DisableReason = user.DisableReason
+			contextData.UserFlags = user.UserFlags
+		}
+	}
+	pathHead, pathTail, _ := strings.Cut(strings.Trim(urlPath, "/"), "/")
+	contextData.PathTail = pathTail
+	switch pathHead {
+	case "static":
+		if pathTail == "" {
+			nbrew.NotFound(w, r, contextData)
+			return
+		}
+		http.ServeFileFS(w, r, runtimeFS, urlPath)
+		return
+	case "login":
+		// nbrew.login(w, r, contextData)
+		return
+	case "logout":
+		if pathTail != "" {
+			nbrew.NotFound(w, r, contextData)
+			return
+		}
+		// nbrew.logout(w, r, contextData) // TODO
+		return
+	case "resetpassword":
+		if pathTail != "" {
+			nbrew.NotFound(w, r, contextData)
+			return
+		}
+		// nbrew.resetpassword(w, r, contextData) // TODO
+		return
+	case "invite":
+		if pathTail != "" {
+			nbrew.NotFound(w, r, contextData)
+			return
+		}
+		// nbrew.invite(w, r, contextData) // TODO
+		return
+	}
+	if contextData.UserID.IsZero() {
+		nbrew.NotAuthenticated(w, r, contextData)
+		return
+	}
+	switch pathHead {
+	case "":
+		http.Redirect(w, r, "/cms/notes/", http.StatusFound)
+		return
+	case "notes":
+		// nbrew.notes(w, r, contextData)
+		return
+	case "photos":
+		// nbrew.photos(w, r, contextData) // TODO
+		nbrew.NotFound(w, r, contextData)
+		return
+	case "blogs":
+		nbrew.NotFound(w, r, contextData)
+		return
+	default:
+		nbrew.NotFound(w, r, contextData)
+		return
+	}
 }

@@ -28,5 +28,44 @@ stop_cmd.go
 routes.go
 notebrew/main.go
 
-TODO: attempt to run notebrew/main.go
-TODO: remove /cms/ root
+modules
+if we have multiple cooperative modules, ObjectStorage has to stop being a dumb key-value store and start using meaningful paths that work in both S3 (identifiers must be permanent) and local filesystem.
+
+/static/notebrew/styles.min.css
+/static/notebrew/script.min.css
+
+notebrew
+- DB
+- Dialect
+- ErrorCode
+- Port
+- InboundIP4
+- InboundIP6
+- OutboundIP4
+- OutboundIP6
+- Domains (modules need to contribute)
+- ManagingDomains (modules need to contribute)
+- CaptchaConfig
+- Mailer
+- MailFrom
+- ReplyTo
+- ProxyConfig
+- DNSProvider
+- CertStorage
+- CertLogger
+- ContentSecurityPolicy (modules need to contribute)
+- Logger
+- MaxMindDBReader
+- MonitoringConifg
+- BackgroundContext
+- backgroundCancel
+- BackgroundWaitGroup
+
+notes
+- CMSDomain
+- CMSDomainHTTPS
+- ContentDomain
+- ContentDomainHTTPS
+- CDNDomain
+- LossyImgCmd
+- VideoCmd

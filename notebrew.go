@@ -233,6 +233,8 @@ type Notebrew struct {
 	// context, and should should initiate shutdown when the background context
 	// is canceled.
 	BackgroundWaitGroup sync.WaitGroup
+
+	Modules []Module
 }
 
 // New returns a new instance of Notebrew. Each field within it still needs to
@@ -1108,18 +1110,20 @@ func (nbrew *Notebrew) Close() error {
 }
 
 type ContextData struct {
-	CDNDomain     string          `json:"cdnDomain"`
-	DevMode       bool            `json:"-"`
-	NotebrewCSS   template.CSS    `json:"-"`
-	NotebrewJS    template.JS     `json:"-"`
+	// == Application-level data == //
+	CDNDomain   string       `json:"cdnDomain"`
+	DevMode     bool         `json:"-"`
+	NotebrewCSS template.CSS `json:"-"`
+	NotebrewJS  template.JS  `json:"-"`
+	// == Request-level data == //
 	URLPath       string          `json:"urlPath"`
+	PathTail      string          `json:"-"`
 	UserID        ID              `json:"userID"`
 	Username      string          `json:"username"`
 	DisableReason string          `json:"disableReason"`
 	UserFlags     map[string]bool `json:"userFlags"`
 	Logger        *slog.Logger    `json:"-"`
 	Referer       string          `json:"-"`
-	PathTail      string          `json:"-"`
 }
 
 func (v ContextData) GoString() string {
