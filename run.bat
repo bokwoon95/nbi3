@@ -1,6 +1,3 @@
-# @ECHO OFF
-# GOTO :ONE
-
 CGO_ENABLED=0
 (
 set -x
@@ -11,6 +8,7 @@ notebrew
 )
 
 : << '::HEREDOC'
+@ECHO OFF
 :ONE
 set CGO_ENABLED=0
 @ECHO ON
@@ -19,9 +17,4 @@ wgo -xdir . npx esbuild ./static/notebrew.js --bundle --outfile=./static/notebre
 wgo -verbose -file .go go install -tags dev ./notebrew :: ^
 notebrew
 @ECHO OFF
-GOTO :TWO
-::HEREDOC
-
-: << '::HEREDOC'
-:TWO
 ::HEREDOC

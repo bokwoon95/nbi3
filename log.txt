@@ -69,3 +69,8 @@ notes
 - CDNDomain
 - LossyImgCmd
 - VideoCmd
+
+How are modules going to insert their behavior into config?
+notebrew config blogs.cmsdomain
+
+modules
