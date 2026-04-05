@@ -8,6 +8,10 @@ cat << EOF
 Line 1
 Line 2
 EOF
+echo\
+  one\
+  two\
+  three
 # -----------------
 
 : << '::EOF'
