@@ -10,7 +10,7 @@ wgo -verbose -file .go go install -tags dev ./notebrew :: \
 notebrew
 )
 
-: << ':: HEREDOC'
+: << '::HEREDOC'
 :ONE
 set CGO_ENABLED=0
 @ECHO ON
@@ -20,7 +20,7 @@ wgo -verbose -file .go go install -tags dev ./notebrew :: ^
 notebrew
 @ECHO OFF
 GOTO :TWO
-:: HEREDOC
+::HEREDOC
 
 : << '::HEREDOC'
 :TWO
