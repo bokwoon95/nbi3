@@ -7,7 +7,7 @@ wgo -xdir . npx esbuild ./static/notebrew.js --bundle --outfile=./static/notebre
 wgo -verbose -file .go go install -tags dev ./notebrew :: ^
 notebrew
 @ECHO OFF
-GOTO :ONE
+GOTO ONE
 ::HEREDOC
 
 CGO_ENABLED=0
