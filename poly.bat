@@ -8,10 +8,10 @@ cat << EOF
 Line 1
 Line 2
 EOF
-echo\
+(set -x; echo\
   one\
   two\
-  three
+  three)
 # -----------------
 
 : << '::EOF'
@@ -22,7 +22,12 @@ ECHO Running in Batch
 ECHO Multiline test:
 ECHO Line 1^
 ECHO Line 2
-PAUSE
+@ECHO ON
+ECHO^
+  one^
+  two^
+  three
+@ECHO OFF
 REM ----------------
 
 ::EOF
