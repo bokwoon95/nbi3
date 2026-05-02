@@ -1,5 +1,24 @@
 [
   {
+    "table": "notebrew_module_namespace",
+    "columns": [
+      {
+        "column": "module",
+        "type": {
+          "default": "VARCHAR(500)"
+        },
+        "primarykey": true
+      },
+      {
+        "column": "namespace",
+        "type": {
+          "default": "VARCHAR(500)"
+        },
+        "unique": true
+      }
+    ]
+  },
+  {
     "table": "notebrew_user",
     "indexes": [
       {
