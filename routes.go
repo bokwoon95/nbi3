@@ -187,7 +187,7 @@ func (nbrew *Notebrew) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	switch pathHead {
 	case "":
-		http.Redirect(w, r, "/cms/notes/", http.StatusFound)
+		nbrew.NotFound(w, r, contextData)
 		return
 	case "notes":
 		// nbrew.notes(w, r, contextData)
