@@ -1,6 +1,6 @@
 [
   {
-    "table": "users",
+    "table": "notebrew_user",
     "indexes": [
       {
         "columns": [
@@ -86,7 +86,7 @@
     ]
   },
   {
-    "table": "ip_login",
+    "table": "notebrew_ip_login",
     "columns": [
       {
         "column": "ip",
@@ -105,7 +105,7 @@
     ]
   },
   {
-    "table": "flash",
+    "table": "notebrew_flash",
     "columns": [
       {
         "column": "flash_token_hash",
@@ -131,7 +131,7 @@
     ]
   },
   {
-    "table": "session",
+    "table": "notebrew_session",
     "columns": [
       {
         "column": "session_token_hash",
@@ -162,7 +162,7 @@
     ]
   },
   {
-    "table": "invite",
+    "table": "notebrew_invite",
     "columns": [
       {
         "column": "invite_token_hash",

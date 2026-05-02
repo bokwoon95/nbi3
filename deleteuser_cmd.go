@@ -47,7 +47,7 @@ Flags:`)
 	if usernameProvided {
 		exists, err := sq.FetchExists(context.Background(), cmd.Notebrew.DB, sq.Query{
 			Dialect: cmd.Notebrew.Dialect,
-			Format:  "SELECT 1 FROM users WHERE username = {username}",
+			Format:  "SELECT 1 FROM notebrew_user WHERE username = {username}",
 			Values: []any{
 				sq.StringParam("username", cmd.Username),
 			},
@@ -70,7 +70,7 @@ Flags:`)
 			cmd.Username = strings.TrimSpace(text)
 			exists, err := sq.FetchExists(context.Background(), cmd.Notebrew.DB, sq.Query{
 				Dialect: cmd.Notebrew.Dialect,
-				Format:  "SELECT 1 FROM users WHERE username = {username}",
+				Format:  "SELECT 1 FROM notebrew_user WHERE username = {username}",
 				Values: []any{
 					sq.StringParam("username", cmd.Username),
 				},
@@ -94,27 +94,9 @@ func (cmd *DeleteuserCmd) Run() error {
 		return err
 	}
 	defer tx.Rollback()
-	_, err = sq.Exec(context.Background(), tx, sq.Query{
-		Dialect: cmd.Notebrew.Dialect,
-		Format: "DELETE FROM site_owner WHERE EXISTS (" +
-			" SELECT 1 FROM users WHERE users.user_id = site_owner.user_id AND users.username = {username}" +
-			")",
-		Values: []any{
-			sq.StringParam("username", cmd.Username),
-		},
-	})
-	_, err = sq.Exec(context.Background(), tx, sq.Query{
-		Dialect: cmd.Notebrew.Dialect,
-		Format: "DELETE FROM site_user WHERE EXISTS (" +
-			" SELECT 1 FROM users WHERE users.user_id = site_user.user_id AND users.username = {username}" +
-			")",
-		Values: []any{
-			sq.StringParam("username", cmd.Username),
-		},
-	})
 	result, err := sq.Exec(context.Background(), tx, sq.Query{
 		Dialect: cmd.Notebrew.Dialect,
-		Format:  "DELETE FROM users WHERE username = {username}",
+		Format:  "DELETE FROM notebrew_user WHERE username = {username}",
 		Values: []any{
 			sq.StringParam("username", cmd.Username),
 		},

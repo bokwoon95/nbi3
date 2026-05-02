@@ -12,7 +12,7 @@ import (
 //go:embed schema_database.json
 var databaseSchemaBytes []byte
 
-type rawTable struct {
+type Table struct {
 	Table      string
 	PrimaryKey []string
 	Columns    []struct {
@@ -49,103 +49,108 @@ type rawTable struct {
 	}
 }
 
-// unmarshalCatalog unmarshals a JSON payload into a *ddl.Catalog.
-func unmarshalCatalog(b []byte, catalog *ddl.Catalog) error {
-	var rawTables []rawTable
+// UnmarshalCatalog unmarshals a JSON payload into a *ddl.Catalog.
+func UnmarshalCatalog(catalog *ddl.Catalog, b []byte, namespace string) error {
+	prefix := ""
+	if namespace != "" {
+		prefix = namespace + "_"
+	}
+	var tables []Table
 	decoder := json.NewDecoder(bytes.NewReader(b))
-	err := decoder.Decode(&rawTables)
+	err := decoder.Decode(&tables)
 	if err != nil {
 		return err
 	}
-	cache := ddl.NewCatalogCache(catalog)
-	schema := cache.GetOrCreateSchema(catalog, "")
-	for _, rawTable := range rawTables {
-		table := cache.GetOrCreateTable(schema, rawTable.Table)
-		if len(rawTable.PrimaryKey) != 0 {
-			cache.AddOrUpdateConstraint(table, ddl.Constraint{
-				ConstraintName: ddl.GenerateName(ddl.PRIMARY_KEY, rawTable.Table, rawTable.PrimaryKey),
+	ddlCache := ddl.NewCatalogCache(catalog)
+	ddlSchema := ddlCache.GetOrCreateSchema(catalog, "")
+	for _, table := range tables {
+		tableName := prefix + table.Table
+		ddlTable := ddlCache.GetOrCreateTable(ddlSchema, tableName)
+		if len(table.PrimaryKey) != 0 {
+			ddlCache.AddOrUpdateConstraint(ddlTable, ddl.Constraint{
+				ConstraintName: ddl.GenerateName(ddl.PRIMARY_KEY, tableName, table.PrimaryKey),
 				ConstraintType: ddl.PRIMARY_KEY,
-				Columns:        rawTable.PrimaryKey,
+				Columns:        table.PrimaryKey,
 			})
 		}
-		for _, rawColumn := range rawTable.Columns {
-			columnType := rawColumn.Type[catalog.Dialect]
+		for _, column := range table.Columns {
+			columnType := column.Type[catalog.Dialect]
 			if columnType == "" {
-				columnType = rawColumn.Type["default"]
+				columnType = column.Type["default"]
 			}
-			if rawColumn.Dialect != "" && rawColumn.Dialect != catalog.Dialect {
+			if column.Dialect != "" && column.Dialect != catalog.Dialect {
 				continue
 			}
-			cache.AddOrUpdateColumn(table, ddl.Column{
-				ColumnName:          rawColumn.Column,
+			ddlCache.AddOrUpdateColumn(ddlTable, ddl.Column{
+				ColumnName:          column.Column,
 				ColumnType:          columnType,
-				IsPrimaryKey:        rawColumn.PrimaryKey,
-				IsUnique:            rawColumn.Unique,
-				IsNotNull:           rawColumn.NotNull,
-				GeneratedExpr:       rawColumn.Generated.Expression,
-				GeneratedExprStored: rawColumn.Generated.Stored,
+				IsPrimaryKey:        column.PrimaryKey,
+				IsUnique:            column.Unique,
+				IsNotNull:           column.NotNull,
+				GeneratedExpr:       column.Generated.Expression,
+				GeneratedExprStored: column.Generated.Stored,
 			})
-			if rawColumn.PrimaryKey {
-				cache.AddOrUpdateConstraint(table, ddl.Constraint{
-					ConstraintName: ddl.GenerateName(ddl.PRIMARY_KEY, rawTable.Table, []string{rawColumn.Column}),
+			if column.PrimaryKey {
+				ddlCache.AddOrUpdateConstraint(ddlTable, ddl.Constraint{
+					ConstraintName: ddl.GenerateName(ddl.PRIMARY_KEY, tableName, []string{column.Column}),
 					ConstraintType: ddl.PRIMARY_KEY,
-					Columns:        []string{rawColumn.Column},
+					Columns:        []string{column.Column},
 				})
 			}
-			if rawColumn.Unique {
-				cache.AddOrUpdateConstraint(table, ddl.Constraint{
-					ConstraintName: ddl.GenerateName(ddl.UNIQUE, rawTable.Table, []string{rawColumn.Column}),
+			if column.Unique {
+				ddlCache.AddOrUpdateConstraint(ddlTable, ddl.Constraint{
+					ConstraintName: ddl.GenerateName(ddl.UNIQUE, tableName, []string{column.Column}),
 					ConstraintType: ddl.UNIQUE,
-					Columns:        []string{rawColumn.Column},
+					Columns:        []string{column.Column},
 				})
 			}
-			if rawColumn.Index {
-				cache.AddOrUpdateIndex(table, ddl.Index{
-					IndexName: ddl.GenerateName(ddl.INDEX, rawTable.Table, []string{rawColumn.Column}),
-					Columns:   []string{rawColumn.Column},
+			if column.Index {
+				ddlCache.AddOrUpdateIndex(ddlTable, ddl.Index{
+					IndexName: ddl.GenerateName(ddl.INDEX, tableName, []string{column.Column}),
+					Columns:   []string{column.Column},
 				})
 			}
-			if rawColumn.References.Table != "" {
-				columnName := rawColumn.References.Column
+			if column.References.Table != "" {
+				columnName := column.References.Column
 				if columnName == "" {
-					columnName = rawColumn.Column
+					columnName = column.Column
 				}
-				cache.AddOrUpdateConstraint(table, ddl.Constraint{
-					ConstraintName:    ddl.GenerateName(ddl.FOREIGN_KEY, rawTable.Table, []string{rawColumn.Column}),
+				ddlCache.AddOrUpdateConstraint(ddlTable, ddl.Constraint{
+					ConstraintName:    ddl.GenerateName(ddl.FOREIGN_KEY, tableName, []string{column.Column}),
 					ConstraintType:    ddl.FOREIGN_KEY,
-					Columns:           []string{rawColumn.Column},
-					ReferencesTable:   rawColumn.References.Table,
+					Columns:           []string{column.Column},
+					ReferencesTable:   column.References.Table,
 					ReferencesColumns: []string{columnName},
 					UpdateRule:        ddl.CASCADE,
 				})
 			}
 		}
-		for _, rawIndex := range rawTable.Indexes {
-			if rawIndex.Dialect != "" && rawIndex.Dialect != catalog.Dialect {
+		for _, index := range table.Indexes {
+			if index.Dialect != "" && index.Dialect != catalog.Dialect {
 				continue
 			}
-			cache.AddOrUpdateIndex(table, ddl.Index{
-				IndexName:      ddl.GenerateName(ddl.INDEX, rawTable.Table, rawIndex.Columns),
-				IndexType:      rawIndex.Type,
-				IsUnique:       rawIndex.Unique,
-				Columns:        rawIndex.Columns,
-				IncludeColumns: rawIndex.IncludeColumns,
-				Predicate:      rawIndex.Predicate,
+			ddlCache.AddOrUpdateIndex(ddlTable, ddl.Index{
+				IndexName:      ddl.GenerateName(ddl.INDEX, tableName, index.Columns),
+				IndexType:      index.Type,
+				IsUnique:       index.Unique,
+				Columns:        index.Columns,
+				IncludeColumns: index.IncludeColumns,
+				Predicate:      index.Predicate,
 			})
 		}
-		for _, rawConstraint := range rawTable.Constraints {
-			if rawConstraint.Dialect != "" && rawConstraint.Dialect != catalog.Dialect {
+		for _, constraint := range table.Constraints {
+			if constraint.Dialect != "" && constraint.Dialect != catalog.Dialect {
 				continue
 			}
-			if rawConstraint.Type != ddl.PRIMARY_KEY && rawConstraint.Type != ddl.FOREIGN_KEY && rawConstraint.Type != ddl.UNIQUE {
-				return fmt.Errorf("%s: invalid constraint type %q", rawTable.Table, rawConstraint.Type)
+			if constraint.Type != ddl.PRIMARY_KEY && constraint.Type != ddl.FOREIGN_KEY && constraint.Type != ddl.UNIQUE {
+				return fmt.Errorf("%s: invalid constraint type %q", tableName, constraint.Type)
 			}
-			cache.AddOrUpdateConstraint(table, ddl.Constraint{
-				ConstraintName:    ddl.GenerateName(rawConstraint.Type, rawTable.Table, rawConstraint.Columns),
-				ConstraintType:    rawConstraint.Type,
-				Columns:           rawConstraint.Columns,
-				ReferencesTable:   rawConstraint.ReferencesTable,
-				ReferencesColumns: rawConstraint.ReferencesColumns,
+			ddlCache.AddOrUpdateConstraint(ddlTable, ddl.Constraint{
+				ConstraintName:    ddl.GenerateName(constraint.Type, tableName, constraint.Columns),
+				ConstraintType:    constraint.Type,
+				Columns:           constraint.Columns,
+				ReferencesTable:   constraint.ReferencesTable,
+				ReferencesColumns: constraint.ReferencesColumns,
 			})
 		}
 	}

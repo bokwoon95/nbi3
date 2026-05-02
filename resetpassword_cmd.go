@@ -78,7 +78,7 @@ Flags:`)
 					email := cmd.User
 					exists, err := sq.FetchExists(context.Background(), cmd.Notebrew.DB, sq.Query{
 						Dialect: cmd.Notebrew.Dialect,
-						Format:  "SELECT 1 FROM users WHERE email = {email}",
+						Format:  "SELECT 1 FROM notebrew_user WHERE email = {email}",
 						Values: []any{
 							sq.StringParam("email", email),
 						},
@@ -94,7 +94,7 @@ Flags:`)
 					username := strings.TrimPrefix(cmd.User, "@")
 					exists, err := sq.FetchExists(context.Background(), cmd.Notebrew.DB, sq.Query{
 						Dialect: cmd.Notebrew.Dialect,
-						Format:  "SELECT 1 FROM users WHERE username = {username}",
+						Format:  "SELECT 1 FROM notebrew_user WHERE username = {username}",
 						Values: []any{
 							sq.StringParam("username", username),
 						},
@@ -168,7 +168,7 @@ func (cmd *ResetpasswordCmd) Run() error {
 			email := cmd.User
 			_, err = sq.Exec(context.Background(), cmd.Notebrew.DB, sq.Query{
 				Dialect: cmd.Notebrew.Dialect,
-				Format:  "UPDATE users SET reset_token_hash = {resetTokenHash} WHERE email = {email}",
+				Format:  "UPDATE notebrew_user SET reset_token_hash = {resetTokenHash} WHERE email = {email}",
 				Values: []any{
 					sq.BytesParam("resetTokenHash", resetTokenHash[:]),
 					sq.StringParam("email", email),
@@ -180,7 +180,7 @@ func (cmd *ResetpasswordCmd) Run() error {
 		} else {
 			_, err = sq.Exec(context.Background(), cmd.Notebrew.DB, sq.Query{
 				Dialect: cmd.Notebrew.Dialect,
-				Format:  "UPDATE users SET reset_token_hash = {resetTokenHash} WHERE username = {username}",
+				Format:  "UPDATE notebrew_user SET reset_token_hash = {resetTokenHash} WHERE username = {username}",
 				Values: []any{
 					sq.BytesParam("resetTokenHash", resetTokenHash[:]),
 					sq.StringParam("username", strings.TrimPrefix(cmd.User, "@")),
@@ -206,8 +206,8 @@ func (cmd *ResetpasswordCmd) Run() error {
 		email := cmd.User
 		_, err = sq.Exec(context.Background(), tx, sq.Query{
 			Dialect: cmd.Notebrew.Dialect,
-			Format: "DELETE FROM session WHERE EXISTS (" +
-				"SELECT 1 FROM users WHERE users.user_id = session.user_id AND users.email = {email}" +
+			Format: "DELETE FROM notebrew_session WHERE EXISTS (" +
+				"SELECT 1 FROM notebrew_user WHERE notebrew_user.user_id = notebrew_session.user_id AND notebrew_user.email = {email}" +
 				")",
 			Values: []any{
 				sq.StringParam("email", email),
@@ -218,7 +218,7 @@ func (cmd *ResetpasswordCmd) Run() error {
 		}
 		_, err = sq.Exec(context.Background(), tx, sq.Query{
 			Dialect: cmd.Notebrew.Dialect,
-			Format:  "UPDATE users SET password_hash = {passwordHash}, reset_token_hash = NULL WHERE email = {email}",
+			Format:  "UPDATE notebrew_user SET password_hash = {passwordHash}, reset_token_hash = NULL WHERE email = {email}",
 			Values: []any{
 				sq.StringParam("passwordHash", cmd.PasswordHash),
 				sq.StringParam("email", email),
@@ -231,8 +231,8 @@ func (cmd *ResetpasswordCmd) Run() error {
 		username := strings.TrimPrefix(cmd.User, "@")
 		_, err = sq.Exec(context.Background(), tx, sq.Query{
 			Dialect: cmd.Notebrew.Dialect,
-			Format: "DELETE FROM session WHERE EXISTS (" +
-				"SELECT 1 FROM users WHERE users.user_id = session.user_id AND users.username = {username}" +
+			Format: "DELETE FROM notebrew_session WHERE EXISTS (" +
+				"SELECT 1 FROM notebrew_user WHERE notebrew_user.user_id = notebrew_session.user_id AND notebrew_user.username = {username}" +
 				")",
 			Values: []any{
 				sq.StringParam("username", username),
@@ -243,7 +243,7 @@ func (cmd *ResetpasswordCmd) Run() error {
 		}
 		_, err = sq.Exec(context.Background(), tx, sq.Query{
 			Dialect: cmd.Notebrew.Dialect,
-			Format:  "UPDATE users SET password_hash = {passwordHash}, reset_token_hash = NULL WHERE username = {username}",
+			Format:  "UPDATE notebrew_user SET password_hash = {passwordHash}, reset_token_hash = NULL WHERE username = {username}",
 			Values: []any{
 				sq.StringParam("passwordHash", cmd.PasswordHash),
 				sq.StringParam("username", username),

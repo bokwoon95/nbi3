@@ -96,7 +96,7 @@ func (cmd *CreateinviteCmd) Run() error {
 	copy(inviteTokenHash[8:], checksum[:])
 	_, err = sq.Exec(context.Background(), cmd.Notebrew.DB, sq.Query{
 		Dialect: cmd.Notebrew.Dialect,
-		Format: "INSERT INTO invite (invite_token_hash, email, site_limit, storage_limit, user_flags)" +
+		Format: "INSERT INTO notebrew_invite (invite_token_hash, email, site_limit, storage_limit, user_flags)" +
 			" VALUES ({inviteTokenHash}, {email}, {siteLimit}, {storageLimit}, {userFlags})",
 		Values: []any{
 			sq.BytesParam("inviteTokenHash", inviteTokenHash[:]),

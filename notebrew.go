@@ -677,7 +677,7 @@ func New(configDir, dataDir string, csp map[string]string) (*Notebrew, error) {
 	databaseCatalog := &ddl.Catalog{
 		Dialect: nbrew.Dialect,
 	}
-	err = unmarshalCatalog(databaseSchemaBytes, databaseCatalog)
+	err = UnmarshalCatalog(databaseCatalog, databaseSchemaBytes, "")
 	if err != nil {
 		return nil, err
 	}

@@ -78,3 +78,27 @@ modules
 notes
 photos
 blogs
+
+github.com/bokwoon95/notebrew notebrew
+github.com/bokwoon95/notebrew/notes notes
+github.com/bokwoon95/notebrew/photos photos
+github.com/bokwoon95/notebrew/blogs blogs
+
+namespace is used in:
+- database table prefix
+- object storage path prefix
+- assets url prefix
+
+CREATE TABLE notebrew_module_namespace (
+    module VARCHAR(255) PRIMARY KEY
+    namespace VARCHAR(255) UNIQUE
+);
+
+notebrew_namespace
+notebrew_user
+notebrew_ip_login
+notebrew_flash
+notebrew_session
+notebrew_invite
+notes_note
+blogs_blog

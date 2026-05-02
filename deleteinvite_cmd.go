@@ -104,7 +104,7 @@ func (cmd *DeleteinviteCmd) Run() error {
 	}
 	result, err := sq.Exec(context.Background(), cmd.Notebrew.DB, sq.Query{
 		Dialect: cmd.Notebrew.Dialect,
-		Format:  "DELETE FROM invite WHERE {condition}",
+		Format:  "DELETE FROM notebrew_invite WHERE {condition}",
 		Values: []any{
 			sq.Param("condition", condition),
 		},

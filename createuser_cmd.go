@@ -120,7 +120,7 @@ Flags:`)
 			}
 			exists, err := sq.FetchExists(context.Background(), cmd.Notebrew.DB, sq.Query{
 				Dialect: cmd.Notebrew.Dialect,
-				Format:  "SELECT 1 FROM users WHERE username = {username}",
+				Format:  "SELECT 1 FROM notebrew_user WHERE username = {username}",
 				Values: []any{
 					sq.StringParam("username", cmd.Username),
 				},
@@ -154,7 +154,7 @@ Flags:`)
 			}
 			exists, err := sq.FetchExists(context.Background(), cmd.Notebrew.DB, sq.Query{
 				Dialect: cmd.Notebrew.Dialect,
-				Format:  "SELECT 1 FROM users WHERE email = {email}",
+				Format:  "SELECT 1 FROM notebrew_user WHERE email = {email}",
 				Values: []any{
 					sq.StringParam("email", cmd.Email),
 				},
@@ -217,7 +217,7 @@ func (cmd *CreateuserCmd) Run() error {
 	}
 	usernameExists, err := sq.FetchExists(context.Background(), cmd.Notebrew.DB, sq.Query{
 		Dialect: cmd.Notebrew.Dialect,
-		Format:  "SELECT 1 FROM users WHERE username = {username}",
+		Format:  "SELECT 1 FROM notebrew_user WHERE username = {username}",
 		Values: []any{
 			sq.StringParam("username", cmd.Username),
 		},
@@ -237,7 +237,7 @@ func (cmd *CreateuserCmd) Run() error {
 	}
 	emailExists, err := sq.FetchExists(context.Background(), cmd.Notebrew.DB, sq.Query{
 		Dialect: cmd.Notebrew.Dialect,
-		Format:  "SELECT 1 FROM users WHERE email = {email}",
+		Format:  "SELECT 1 FROM notebrew_user WHERE email = {email}",
 		Values: []any{
 			sq.StringParam("email", cmd.Email),
 		},
@@ -255,7 +255,7 @@ func (cmd *CreateuserCmd) Run() error {
 	defer tx.Rollback()
 	_, err = sq.Exec(context.Background(), tx, sq.Query{
 		Dialect: cmd.Notebrew.Dialect,
-		Format: "INSERT INTO users (user_id, username, email, password_hash, site_limit, storage_limit, user_flags)" +
+		Format: "INSERT INTO notebrew_user (user_id, username, email, password_hash, site_limit, storage_limit, user_flags)" +
 			" VALUES ({userID}, {username}, {email}, {passwordHash}, {siteLimit}, {storageLimit}, {userFlags})",
 		Values: []any{
 			sq.UUIDParam("userID", NewID()),
